@@ -15,6 +15,17 @@ cordRY = -100
 
 #Logic Storage
 answerHistory = []
+
+def scoreCalculator(answerHistory):
+    score = 0
+    for answer in answerHistory:
+        if answer == 'Y':
+            score += 1
+        elif answer == 'N':
+            score += 0
+    globalScore = score*10
+    return globalScore
+
 questions = ("When did WW2 Start (Western Front)?",
              "Where is Albania Located?",
              "What is the (Objectively) Most Popular Anime?",
@@ -44,12 +55,7 @@ correctAnswers = [1, 1, 4, 3, 2, 2, 1, 2, 1, 2, 2, 1]
 void = []
 i = 0
 
-#Text Wrapper (Text is too large for screen)
-
-
-
-
-# Randomizer
+#Randomizer
 def Randomizer():
     while True:
         Randomizer.x = random.randint(0, len(questions) - 1)
@@ -68,34 +74,27 @@ questionsPreFont = pygame.font.Font('media/font/PathwayN.ttf', 18)
 greyClr = (40,40,40)
 redClr = (222, 80, 80)
 whiteClr = (255,255,255)
-
-#GameOver
-def gameOver():
-    print(1)
+blackClr = (0,0,0)
 
 def controls():
     global cordRX
     global cordRY
-
+    
     keys = pygame.key.get_pressed()
     if keys[pygame.K_1]:
-        print("1")
         cordRX = 40
         cordRY = 380
         controls.answerGiven = 1
         pygame.display.update()
     elif keys[pygame.K_2]:
-        print("2")
         cordRX = 40
         cordRY = 470
         controls.answerGiven = 2
     elif keys[pygame.K_3]:
-        print("3")
         cordRX = 40
         cordRY = 560
         controls.answerGiven = 3
     elif keys[pygame.K_4]:
-        print("4")
         cordRX = 40
         cordRY = 650
         controls.answerGiven = 4
@@ -103,19 +102,22 @@ def controls():
         print("Confirmed")
         cordRX = -100
         cordRY = -100
-        print("--------",len(void))
-        print("--------",len(questions))
+        # print("--------",len(void))
+        # print("--------",len(questions))
+        
         # Checks the remaining questions (and if the game can continue)
-        if len(void) == 10:
+        if len(void) == 11 and len(answerHistory):
             print("No more questions left. Game over.")
-            gameOver()
-        else:
+        elif controls.answerGiven != "":
             if controls.answerGiven == correctAnswers[Randomizer.x]:
                 answerHistory.append("Y")
                 Randomizer()
+            elif controls.answerGiven == "":    
+                print("NULL")
             else:
                 answerHistory.append("N")
                 Randomizer()
+            controls.answerGiven = ""
 
 #Start Screen / Will Become In Valid Once Confirmed in While Loop
 screen.fill(greyClr)
@@ -187,19 +189,44 @@ def draw():
     text()
     pygame.display.update()
 
-            
+controls.answerGiven = ""    
+
+#Game Over Text/Screen
+def gameOver():
+    screen.fill((0, 0, 0))  # Clear the screen by filling it with a black color
+
+    gameOverFont = pygame.font.Font('media/font/Montserrat-Bold.ttf', 50)
+    gameOverText = gameOverFont.render("Game Over | Score : "+str(scoreCalculator(answerHistory))+"%", True, whiteClr)
+    gameoverRect = gameOverText.get_rect(center=(xLength // 2, yLength // 2))
+
+
+    screen.blit(gameOverText, gameoverRect)
+    pygame.display.update()
+
+      
 def main():
     clock = pygame.time.Clock()
     run = True
+    gameOverCheck = False 
+
     while run:
-        clock.tick(8)  # Ensures 60FPS and 60 Updates a Second (Quiz Game Doesnt Need High FPS)
+        clock.tick(8)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
 
         controls()
-        draw()
+
+        if gameOverCheck:
+            gameOver()
+        else:
+            draw()
+
+        #Will End Game on Question 11 (When Question 10 Has Been Answered)
+        if len(void) == 11:
+            gameOverCheck = True
+
     
 #Makes sure that this file is ran directly
 if __name__ == "__main__":
