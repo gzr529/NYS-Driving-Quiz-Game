@@ -10,47 +10,68 @@ pygame.display.set_caption("NYS Drivers Quiz")
 
 #Assets
 button = pygame.image.load("media/img/button.png")
-
-#button = pygame.transform.scale(buttonRaw, (250, 90))
 cordRX = -100
 cordRY = -100
 
-#Logic
+#Logic Storage
 answerHistory = []
+questions = ("When did WW2 Start (Western Front)?",
+             "Where is Albania Located?",
+             "What is the (Objectively) Most Popular Anime?",
+             "How long is an Olympic swimming pool (in meters)?",
+             "What is the name of the biggest technology company in South Korea?",
+             "What is the most consumed manufactured drink in the world?",
+             "What is the term for the psychological phenomenon in which people tend to remember the first and last items on a list better than those in the middle?",
+             "When did the USSR Collapse?",
+             "Which of these counties is located in the Caucasus Mountains?",
+             "How many died in the Challenger Explosion?",
+             "What is the Hottest Planet in the Solar System?",
+             "What's the smallest country in the world?",)
+answers = (("1939", "1941", "1947", "1944"),
+           ("Balkans", "Baltics", "South East Asia", "Siberia"),
+           ("One Piece", "Naruto", "Attack on Titan", "Fullmetal Alchemist: Brotherhood"),
+           ("30", "25", "50", "100"),
+           ("LG", "Samsung", "Hyundai", "SK Hynix"),
+           ("Coca-Cola", "Tea", "Coffee", "Pepsi"),
+           ("Serial Position Effect", "List Effect",
+            "Memory Bias", "Primacy-Recency Effect"),
+           ("1985", "1991", "1989", "1990"),
+           ("Azerbaijan", "Bulgaria", "Nepal", "Vietnam"),
+           ("5", "7", "10", "12"),
+           ("Mercury", "Venus", "Earth", "Mars"),
+           ("Vatican City", "Monaco", "Nauru", "San Marino"),)
+correctAnswers = [1, 1, 4, 3, 2, 2, 1, 2, 1, 2, 2, 1]
+void = []
+i = 0
 
-# list1 = [1,1,1,1]
-# list2 = ["How fast do you drive",
-#          "What color is stop sign",
-#          "Break pedal on left",
-#          "Kill",
-#          "Your",
-#          "Self",
-#          "Smile"]
-# list4 = ["Qa","Qb","Qc","Qd","Qe","Qf","Qg"]
-# list3 = []
-    
-# def Randomizer(): 
-#     x = random.randint(0,len(list2)-1)
-#     if x in list3:
-#         list1.sort()
-#         #print("This # Has Been Used!", list2[x])  
-#     else:
-#         list3.append(x)
-#         list3.sort()
-        
-# while True:
-#     Randomizer()
-#     if len(list2) == len(list3):
-#         print("No More Questions!")
-#         break   
+#Text Wrapper (Text is too large for screen)
 
+
+
+
+# Randomizer
+def Randomizer():
+    while True:
+        Randomizer.x = random.randint(0, len(questions) - 1)
+        if Randomizer.x not in void:
+            void.append(Randomizer.x)
+            break
+    void.sort()
+
+Randomizer()
 
 #Colors/Font
 numFont = pygame.font.Font('media/font/Montserrat-Medium.ttf', 15)
 titleFont = pygame.font.Font('media/font/Montserrat-Bold.ttf', 18)
+questionsFont = pygame.font.Font('media/font/PathwayI.ttf', 30)
+questionsPreFont = pygame.font.Font('media/font/PathwayN.ttf', 18)
 greyClr = (40,40,40)
 redClr = (222, 80, 80)
 whiteClr = (255,255,255)
+
+#GameOver
+def gameOver():
+    print(1)
 
 def controls():
     global cordRX
@@ -82,32 +103,78 @@ def controls():
         print("Confirmed")
         cordRX = -100
         cordRY = -100
-        if controls.answerGiven == 3:
-            print("YAYAYA!")
-            answerHistory.append("Y")
+        print("--------",len(void))
+        print("--------",len(questions))
+        # Checks the remaining questions (and if the game can continue)
+        if len(void) == 10:
+            print("No more questions left. Game over.")
+            gameOver()
         else:
-            answerHistory.append("N")
-
-
+            if controls.answerGiven == correctAnswers[Randomizer.x]:
+                answerHistory.append("Y")
+                Randomizer()
+            else:
+                answerHistory.append("N")
+                Randomizer()
 
 #Start Screen / Will Become In Valid Once Confirmed in While Loop
 screen.fill(greyClr)
 pygame.display.update()
 
+#Wraps Text to make more Readable
+def wrap_text(text, font, max_width):
+    words = text.split(" ")
+    lines = []
+    current_line = ""
+
+    for word in words:
+        test_line = current_line + word + " "
+        test_width, _ = font.size(test_line)
+
+        if test_width < max_width:
+            current_line = test_line
+        else:
+            lines.append(current_line.strip())
+            current_line = word + " "
+
+    lines.append(current_line.strip())
+    return lines
+
+
 #Text Handler
 def text():
-    numText = numFont.render(('1'), True, whiteClr)
-    screen.blit(numText, (40, 371))
-    numText = numFont.render('2', True, whiteClr)
-    screen.blit(numText, (40, 461))
-    numText = numFont.render('3', True, whiteClr)
-    screen.blit(numText, (40, 551))
-    numText = numFont.render('4', True, whiteClr)
-    screen.blit(numText, (40, 641))
-    titleText = titleFont.render('Use NUM Keys to Select then Press "C" to Confrim Answer', True, whiteClr)
+    y_positions = [371, 461, 551, 641]
+
+    # Multiple Choice Numbers
+    for i in range(1, 5):
+        numText = numFont.render(str(i), True, whiteClr)
+        screen.blit(numText, (40, y_positions[i - 1]))
+
+    # Multiple Choice Answers
+    for i in range(1, 5):
+        ansText = numFont.render(answers[Randomizer.x][i - 1], True, whiteClr)
+        screen.blit(ansText, (70, y_positions[i - 1]))
+
+    # Text for Info
+    titleText = titleFont.render(
+        'Use NUM Keys to Select then Press "C" to Confirm Answer', True, whiteClr)
     screen.blit(titleText, (130, 314))
-    titleText = titleFont.render(str(answerHistory), True, whiteClr)
-    screen.blit(titleText, (130, 250))
+
+    # Wrapped Question Text
+    question_lines = wrap_text(
+        questions[Randomizer.x], questionsFont, xLength - 150)
+    for i, line in enumerate(question_lines):
+        titleText = questionsFont.render(line, True, whiteClr)
+        screen.blit(titleText, (130, 100 + i * 40))
+
+    titleText = questionsPreFont.render(
+        "Question " + str(len(void)), True, whiteClr)
+    screen.blit(titleText, (130, 80))
+    titleText = questionsPreFont.render(str(answerHistory), True, whiteClr)
+    screen.blit(titleText, (130, 290))
+    titleText = titleFont.render("Answer History Below:", True, whiteClr)
+    screen.blit(titleText, (130, 270))
+
     
 #Draws Window Colordef drawScreen():
 def draw():
@@ -125,7 +192,7 @@ def main():
     clock = pygame.time.Clock()
     run = True
     while run:
-        clock.tick(15)  # Ensures 60FPS and 60 Updates a Second (Quiz Game Doesnt Need High FPS)
+        clock.tick(8)  # Ensures 60FPS and 60 Updates a Second (Quiz Game Doesnt Need High FPS)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -133,9 +200,6 @@ def main():
 
         controls()
         draw()
-
-    pygame.quit()
-    
     
 #Makes sure that this file is ran directly
 if __name__ == "__main__":
